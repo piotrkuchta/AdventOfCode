@@ -8,8 +8,8 @@ const octs = input.split('\n')
     .map(s => s.split('').map(v => ({energy: Number(v), lastFlashed: -1})));
 
 let allFlashed = false;
-let s
-for (s = 0; !allFlashed; s++) {
+let step = 0;
+while (!allFlashed) {
     for (let i = 0; i < octs.length; i++) {
         for (let j = 0; j < octs[i].length; j++) {
             tryIncrease(i, j);
@@ -17,7 +17,7 @@ for (s = 0; !allFlashed; s++) {
     }
     for (let i = 0; i < octs.length; i++) {
         for (let j = 0; j < octs[i].length; j++) {
-            tryFlash(i, j, s);
+            tryFlash(i, j, step);
         }
     }
     for (let i = 0; i < octs.length; i++) {
@@ -33,9 +33,10 @@ for (s = 0; !allFlashed; s++) {
             allFlashed = allFlashed && octs[i][j].energy === 0;
         }
     }
+    step++;
 }
 
-console.log(s);
+console.log(step);
 
 function tryFlash(i: number, j: number, s: number) {
     if (i >= 0 && i < 10 && j >= 0 && j < 10) {
