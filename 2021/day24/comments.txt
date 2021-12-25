@@ -1,0 +1,19 @@
+inp w       // load input
+mul x 0     // v
+add x z     // v
+mod x 26    // copy current stack to regx
+div z 1     // if 1 => fun is push. if 26 => fun is pop
+add x 10    // always > 0 when 1 above. always < 0 when 26 above. regx = currStack + X (X == 10)
+eql x w     // always 0 for push, MUST be 1 for pop => input == currStack + X
+eql x 0     // invert - always 1 for push, MUST be 0 for pop. Pop ends here
+mul y 0     // v
+add y 25    // v
+mul y x     // v
+add y 1     // v
+mul z y     // multiple stack by 26 (move pointer to the right)
+mul y 0     // v
+add y w     // v
+add y 15    // v
+mul y x     // regy = input + Y (Y == 15)
+add z y     // put input on stack
+// when pop occcurs (input == prevInput + Y + X) relation needs to be fulfiled
