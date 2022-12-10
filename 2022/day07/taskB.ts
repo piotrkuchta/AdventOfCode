@@ -1,12 +1,16 @@
 import { readFileSync } from 'fs';
 import { isNumber, min } from "lodash";
 
+interface Dir {
+  [key: string]: Dir | number;
+}
+
 const input = readFileSync('input.txt', 'utf-8').split('\n');
 let curr = 0;
 let total = 70_000_000
 let need = 30_000_000;
 
-function parseInput(currObj = {}) {
+function parseInput(currObj: Dir = {}) {
   while (true) {
     curr++;
 
@@ -15,18 +19,14 @@ function parseInput(currObj = {}) {
     }
 
     let line = input[curr].split(' ');
-    // console.log(line);
     if (line[0] === 'dir') {
-      // @ts-ignore
       currObj[line[1]] = {};
     } else if (!isNaN(Number(line[0]))) {
-      // @ts-ignore
       currObj[line[1]] = Number(line[0]);
     } else if (line[1] === 'cd') {
       if (line[2] === '..') {
         return currObj;
       } else {
-        // @ts-ignore
         currObj[line[2]] = parseInput({});
       }
     }
@@ -35,15 +35,12 @@ function parseInput(currObj = {}) {
 
 let result: unknown[] = [];
 let fileSystem = parseInput();
-console.log(fileSystem)
 
-function sumDir(dir: any): unknown {
-  let reduce = Object.values(dir).reduce((sum, c) => {
+function sumDir(dir: any): number {
+  let reduce = Object.values(dir).reduce((sum: number, c) => {
     if (isNumber(c)) {
-      // @ts-ignore
       return sum + c;
     } else {
-      // @ts-ignore
       return sum + sumDir(c);
     }
   }, 0);
