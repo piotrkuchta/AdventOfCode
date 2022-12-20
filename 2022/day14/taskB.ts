@@ -76,11 +76,14 @@ encoder.createReadStream().pipe(createWriteStream('result.gif'));
 encoder.start();
 encoder.setRepeat(0);
 encoder.setDelay(20);
-encoder.setQuality(1);
+encoder.setQuality(3);
 
 
 const canvas = createCanvas(WIDTH - START_CANVAS, height)
 const context = canvas.getContext('2d')
+
+var perlin = require('perlin-noise');
+let generatePerlinNoise = perlin.generatePerlinNoise(WIDTH - START_CANVAS, height);
 
 // for (let frame = 0; frame < 100; frame++) {
   for (let i = 0; i < map.length; i++) {
@@ -92,7 +95,8 @@ const context = canvas.getContext('2d')
         context.fillStyle = sample(['#f5a742', '#ad7a3b', '#d98c21', '#e8b56e'])!;
         context.fillRect(j - START_CANVAS, i, 1, 1);
       } else {
-        context.fillStyle = sample(['#5d5d5d', '#545454', '#565656', '#484848'])!;
+        let collection = ['#5d5d5d', '#545454', '#565656', '#484848'];
+        context.fillStyle = collection[Math.floor(generatePerlinNoise[i * (WIDTH - START_CANVAS) + j - START_CANVAS] * 4)];
         context.fillRect(j - START_CANVAS, i, 1, 1);
       }
     }
@@ -117,19 +121,25 @@ for (let i = 0; i < 20870; i++) {
       sand.x++;
     } else {
       // console.log('sand');
-      sand.inPlace = true;
+      // sand.inPlace = true;
       map[sand.y][sand.x] = SAND;
     }
   }
 
-  sands.filter(sand => !sand.inPlace).forEach(sand => {
-    context.fillStyle = sand.color;
-    context.fillRect(sand.x - START_CANVAS, sand.y, 1, 1);
-  });
-  encoder.addFrame(context);
-  console.log(i);
+  if (i % 100  === 0) {
+    sands.filter(sand => !sand.inPlace).forEach(sand => {
+      context.fillStyle = sand.color;
+      context.fillRect(sand.x - START_CANVAS, sand.y, 1, 1);
+    });
+    encoder.addFrame(context);
+    console.log(i);
+  }
 }
-
+sands.filter(sand => !sand.inPlace).forEach(sand => {
+  context.fillStyle = sand.color;
+  context.fillRect(sand.x - START_CANVAS, sand.y, 1, 1);
+});
+encoder.addFrame(context);
 encoder.finish();
 
 
