@@ -18,42 +18,114 @@ const input: { [key: string]: { rate: number, paths: string[] } } =
 
 console.log(input);
 
-let visited = new Map<string, number>();
-let distance: {path: string, released: number}[] = [];
-let Q: {path: string, currentNode: string, timeLeft: number, currentFlow: number, released: number, opened: string}[]  = []; //Queue
-Q.push({currentFlow: 0, released: 0, path: '', currentNode: 'AA', timeLeft: 29, opened: ''});
-
-while(Q.length > 0)
+let distance: { path: string, released: number , opened: string}[] = [];
+let distance2: { path: string, released: number , opened: string}[] = [];
+console.time('task');
 {
-  // console.log(visited);
-  let {path, currentNode, timeLeft, currentFlow, released, opened} = Q.shift()!;
-  let currentInput = input[currentNode];
+  let visited = new Map<string, number>();
+  let Q: { path: string, currentNodeEl: string, timeLeft: number, currentFlow: number, released: number, opened: string }[] = []; //Queue
+  Q.push({currentFlow: 0, released: 0, path: '', currentNodeEl: 'AA', timeLeft: 26, opened: ''});
 
-  if (timeLeft <= 0) {
-    released += currentFlow;
-    distance.push({path: `${path} ${currentNode}`, released});
-    continue;
+  while (Q.length > 0) {
+    // console.log(visited);
+    let {path, currentNodeEl, timeLeft, currentFlow, released, opened} = Q.shift()!;
+    let currentInputEl = input[currentNodeEl];
+
+    if (timeLeft <= 1) {
+      released += currentFlow;
+      distance.push({path: `${path} ${currentNodeEl}`, released, opened});
+      continue;
+    }
+
+    if (currentInputEl.rate !== 0 && !opened.includes(currentNodeEl)) {
+      Q.push({
+        path,
+        released: released + currentFlow,
+        currentFlow: currentFlow + currentInputEl.rate,
+        currentNodeEl,
+        timeLeft: timeLeft - 1,
+        opened: `${opened} ${currentNodeEl}`
+      });
+    }
+
+    let paths = currentInputEl.paths.filter(next => !visited.has([currentNodeEl, next].toString()) || visited.get([currentNodeEl, next].toString())! < released + currentFlow);
+    if (paths.length > 0) {
+      paths.forEach(nodeToGo => {
+        visited.set([currentNodeEl, nodeToGo].toString(), released + currentFlow)
+        Q.push({
+          path: `${path} ${currentNodeEl}`,
+          released: released + currentFlow,
+          currentFlow,
+          currentNodeEl: nodeToGo,
+          timeLeft: timeLeft - 1,
+          opened
+        });
+      })
+    } else {
+      released += currentFlow * (timeLeft);
+      distance.push({path: `${path} ${currentNodeEl}`, released, opened})
+    }
+
   }
-
-  let paths = currentInput.paths.filter(next => !visited.has([currentNode, next].toString()) || visited.get([currentNode, next].toString())! < released + currentFlow);
-
-  if (currentInput.rate !== 0 && !opened.includes(currentNode)) {
-    Q.push({path, released: released + currentFlow, currentFlow: currentFlow + currentInput.rate, currentNode, timeLeft: timeLeft - 1, opened: `${opened} ${currentNode}`});
-  }
-  if (paths.length > 0) {
-    paths.forEach(nodeToGo => {
-      visited.set([currentNode, nodeToGo].toString(), released + currentFlow)
-      Q.push({path: `${path} ${currentNode}`, released: released + currentFlow, currentFlow, currentNode: nodeToGo, timeLeft: timeLeft - 1, opened});
-    })
-  } else {
-    released += currentFlow * (timeLeft );
-    distance.push({path: `${path} ${currentNode}`, released})
-  }
-
 }
-
 console.table(distance);
-console.table(distance.reduce((max, c) => Math.max(max, c.released), 0));
+
+let max = distance.reduce((max, c) => Math.max(max, c.released), 0);
+for (let distanceElement of distance.filter(d => d.opened.length >= 15)) {
+// for (let distanceElement of distance) {
+  console.log(distanceElement);
+  let visited = new Map<string, number>();
+  let Q: { path: string, currentNodeEl: string, timeLeft: number, currentFlow: number, released: number, opened: string }[] = []; //Queue
+  Q.push({currentFlow: 0, released: 0, path: '', currentNodeEl: 'AA', timeLeft: 26, opened: distanceElement.opened});
+
+  while (Q.length > 0) {
+    // console.log(visited);
+    let {path, currentNodeEl, timeLeft, currentFlow, released, opened} = Q.shift()!;
+    let currentInputEl = input[currentNodeEl];
+
+    if (timeLeft <= 1) {
+      released += currentFlow;
+      distance2.push({path: `${path} ${currentNodeEl}`, released: released + distanceElement.released, opened});
+      continue;
+    }
+
+    if (currentInputEl.rate !== 0 && !opened.includes(currentNodeEl)) {
+      Q.push({
+        path,
+        released: released + currentFlow,
+        currentFlow: currentFlow + currentInputEl.rate,
+        currentNodeEl,
+        timeLeft: timeLeft - 1,
+        opened: `${opened} ${currentNodeEl}`
+      });
+    }
+
+    let paths = currentInputEl.paths.filter(next => !visited.has([currentNodeEl, next].toString()) || visited.get([currentNodeEl, next].toString())! < released + currentFlow);
+    if (paths.length > 0) {
+      paths.forEach(nodeToGo => {
+        visited.set([currentNodeEl, nodeToGo].toString(), released + currentFlow)
+        Q.push({
+          path: `${path} ${currentNodeEl}`,
+          released: released + currentFlow,
+          currentFlow,
+          currentNodeEl: nodeToGo,
+          timeLeft: timeLeft - 1,
+          opened
+        });
+      })
+    } else {
+      released += currentFlow * (timeLeft);
+      distance2.push({path: `${path} ${currentNodeEl}`, released: released + distanceElement.released, opened})
+    }
+
+  }
+}
+console.timeEnd('task');
+
+let max2 = distance2.reduce((max, c) => Math.max(max, c.released), 0);
+// console.table(distance2);
+console.table(max);
+console.table(max2);
 
 
 //AA DD CC BB AA II JJ II AA DD EE FF GG HH GG FF EE DD CC

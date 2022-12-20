@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { chunk } from "lodash";
 
 const input = readFileSync('input.txt', 'utf-8');
 
@@ -21,11 +22,6 @@ input.split('\n')
     }
   });
 
-
-console.log(crt.substring(0,40));
-console.log(crt.substring(40,80));
-console.log(crt.substring(80,120));
-console.log(crt.substring(120,160));
-console.log(crt.substring(160,200));
-console.log(crt.substring(200,240));
+chunk(crt, 40)
+  .forEach(line => console.log(line.join('')));
 
